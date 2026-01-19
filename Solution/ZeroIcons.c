@@ -31,10 +31,10 @@ CHAR g_pColorPatch[] =
 // For future updates, patch diff'ing will make updating this hack extremely fast.
 // I would use signatures, but uh... I don't feel like it.
 // This offset is for icons.
-#define ICONS_OFFSET 0x26F905
+#define ICONS_OFFSET 0x276ff5
 
 // This offset is for icon colors.
-#define COLORS_OFFSET 0x89DCD
+#define COLORS_OFFSET 0 // TODO: Add the colors offset
 
 // This offset is for icon glow.
 // Unfortunately, I DON'T HAVE A DAMN CLUE WHERE IT IS!!!!
@@ -42,17 +42,17 @@ CHAR g_pColorPatch[] =
 
 // The expected bytes at the offset above.
 // If the bytes do not match, then bail out; it's likely that GD updated.
-#define ICONS_ORIGINAL_BYTES 0x75C084FFF09BD6E8
-#define COLORS_ORIGINAL_BYTES 0x74C084000EFAEEE8
+#define ICONS_ORIGINAL_BYTES 0x75C084FFF05546E8
+#define COLORS_ORIGINAL_BYTES 0
 #define GLOW_ORIGINAL_BYTES 0
 
 // The patched bytes for the offsets above.
 // If the bytes match, then that means the game is already patched and we can skip the patching process for that address.
 #define ICONS_PATCHED_BYTES 0x75C08490909001B0
-#define COLORS_PATCHED_BYTES 0x74C08490909001B0
+#define COLORS_PATCHED_BYTES 0
 #define GLOW_PATCHED_BYTES 0
 
-void WritePatch(HANDLE hProcess, PVOID pTargetAddress, ULONG_PTR ExpectedBytes, ULONG_PTR PatchedBytes, CHAR* pPatchCode, SIZE_T PatchLength);
+char WritePatch(HANDLE hProcess, PVOID pTargetAddress, ULONG_PTR ExpectedBytes, ULONG_PTR PatchedBytes, CHAR* pPatchCode, SIZE_T PatchLength);
 
 // Credits to...
 // Absolute - The original 2.2 Unlock All/Icon Hack (which I reverse engineered; I could've done it my own way, but the code would've looked worse than it does now).
@@ -165,8 +165,18 @@ int main(int argc, char** argv)
 	printf("[+] Icon Unlock Address: 0x%p\n[+] Color Unlock Address: 0x%p\n", pIconsAddress, pColorsAddress);
 
 	// Patch the game!
-	WritePatch(hProcess, pIconsAddress, ICONS_ORIGINAL_BYTES, ICONS_PATCHED_BYTES, g_pIconPatch, sizeof(g_pIconPatch));
-	WritePatch(hProcess, pColorsAddress, COLORS_ORIGINAL_BYTES, COLORS_PATCHED_BYTES, g_pColorPatch, sizeof(g_pColorPatch));
+	if (!WritePatch(hProcess, pIconsAddress, ICONS_ORIGINAL_BYTES, ICONS_PATCHED_BYTES, g_pIconPatch, sizeof(g_pIconPatch)))
+	{
+		getchar();
+		return 1;
+	}
+
+	// TODO: Will need to be added back
+	//if (WritePatch(hProcess, pColorsAddress, COLORS_ORIGINAL_BYTES, COLORS_PATCHED_BYTES, g_pColorPatch, sizeof(g_pColorPatch)))
+	//{
+	//	getchar();
+	//	return 1;
+	//}
 
 	// ALL. DONE.
 	printf("[+] Done! You may now close this window.\n");
@@ -174,7 +184,7 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-void WritePatch(HANDLE hProcess, PVOID pTargetAddress, ULONG_PTR ExpectedBytes, ULONG_PTR PatchedBytes, CHAR* pPatchCode, SIZE_T PatchLength)
+char WritePatch(HANDLE hProcess, PVOID pTargetAddress, ULONG_PTR ExpectedBytes, ULONG_PTR PatchedBytes, CHAR* pPatchCode, SIZE_T PatchLength)
 {
 	ULONG_PTR Bytes = 0;
 
@@ -182,7 +192,7 @@ void WritePatch(HANDLE hProcess, PVOID pTargetAddress, ULONG_PTR ExpectedBytes, 
 	if (!ReadProcessMemory(hProcess, pTargetAddress, &Bytes, sizeof(Bytes), 0))
 	{
 		printf("[-] Failed to read process memory. Error: %d (0x%x)\n", GetLastError(), GetLastError());
-		return;
+		return 1;
 	}
 
 	// Uncomment the line below to get the 8 bytes located at the target address.
@@ -193,7 +203,7 @@ void WritePatch(HANDLE hProcess, PVOID pTargetAddress, ULONG_PTR ExpectedBytes, 
 	if (Bytes == PatchedBytes)
 	{
 		printf("[+] Looks like this offset is already patched! Skipping...\n");
-		return;
+		return 0;
 	}
 
 	// That "future check" is here.
@@ -202,14 +212,16 @@ void WritePatch(HANDLE hProcess, PVOID pTargetAddress, ULONG_PTR ExpectedBytes, 
 	if (Bytes != ExpectedBytes)
 	{
 		printf("[-] Failed to find the expected bytes. Did Geometry Dash update? Found Bytes: 0x%p\n", (PVOID)Bytes);
-		return;
+		return 1;
 	}
 
 	// And finally, we patch out the code so that the checks always succeed!
 	if (!WriteProcessMemory(hProcess, pTargetAddress, pPatchCode, PatchLength, 0))
 	{
 		printf("[-] Failed to write process memory. Error: %d (0x%x)\n", GetLastError(), GetLastError());
-		return;
+		return 1;
 	}
+
 	printf("[+] Successfully patched address 0x%p!\n", pTargetAddress);
+	return 0;
 }
