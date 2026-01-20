@@ -165,7 +165,7 @@ int main(int argc, char** argv)
 	printf("[+] Icon Unlock Address: 0x%p\n[+] Color Unlock Address: 0x%p\n", pIconsAddress, pColorsAddress);
 
 	// Patch the game!
-	if (!WritePatch(hProcess, pIconsAddress, ICONS_ORIGINAL_BYTES, ICONS_PATCHED_BYTES, g_pIconPatch, sizeof(g_pIconPatch)))
+	if (WritePatch(hProcess, pIconsAddress, ICONS_ORIGINAL_BYTES, ICONS_PATCHED_BYTES, g_pIconPatch, sizeof(g_pIconPatch)))
 	{
 		getchar();
 		return 1;
