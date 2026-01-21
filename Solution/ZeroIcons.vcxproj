@@ -19,7 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Patch.c" />
     <ClCompile Include="ZeroIcons.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Defs.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
