@@ -130,24 +130,25 @@ int main(int argc, char** argv)
 		"[>] Enable glow? "
 	);
 	Input = (CHAR)getchar();
-	getchar(); // You may wonder why I need 2 calls to getchar, that's because there is the character the user presses, and then a new line that the next getchar will take. Fantastic.
 	switch (Input)
 	{
 	case 'Y':
 	case 'y':
 	{
 		WriteGlowPatch(hProcess, hModule, 1);
+		getchar(); // You may wonder why I need 2 calls to getchar, that's because there is the character the user presses, and then a new line that the next getchar will take. Fantastic.
 		break;
 	}
 	case 'N':
 	case 'n':
 	{
 		WriteGlowPatch(hProcess, hModule, 0);
+		getchar(); // You may wonder why I need 2 calls to getchar, that's because there is the character the user presses, and then a new line that the next getchar will take. Fantastic.
 		break;
 	}
 	}
 
-	printf("\n[+] Done! You may now close this window.\n");
+	printf("\n[+] Done! You may now close this window.");
 	getchar();
 	return 0;
 }
