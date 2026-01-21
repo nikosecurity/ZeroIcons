@@ -130,6 +130,7 @@ int main(int argc, char** argv)
 		"[>] Enable glow? "
 	);
 	Input = (CHAR)getchar();
+	getchar(); // You may wonder why I need 2 calls to getchar, that's because there is the character the user presses, and then a new line that the next getchar will take. Fantastic.
 	switch (Input)
 	{
 	case 'Y':
@@ -146,7 +147,7 @@ int main(int argc, char** argv)
 	}
 	}
 
-	printf("[+] Done! You may now close this window.\n");
+	printf("\n[+] Done! You may now close this window.\n");
 	getchar();
 	return 0;
 }
