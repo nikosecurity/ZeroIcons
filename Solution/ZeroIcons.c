@@ -39,8 +39,7 @@ int main(int argc, char** argv)
 
 	PVOID pIconsAddress = 0;
 	PVOID pColorsAddress = 0;
-
-	CHAR Input = 0;
+	PVOID pGlowAddress = 0;
 
 	SetConsoleTitleA("ZeroIcons Icon Hack");
 	printf
@@ -117,38 +116,14 @@ int main(int argc, char** argv)
 
 	pIconsAddress = (PCHAR)(hModule)+ICONS_OFFSET;
 	pColorsAddress = (PCHAR)(hModule)+COLORS_OFFSET;
-	printf("[+] Icon Unlock Address: 0x%p\n[+] Color Unlock Address: 0x%p\n", pIconsAddress, pColorsAddress);
+	pGlowAddress = (PCHAR)(hModule)+GLOW_OFFSET;
+	printf("[+] Icon Unlock Address: 0x%p\n[+] Color Unlock Address: 0x%p\n[+] Glow Unlock Address: 0x%p\n", pIconsAddress, pColorsAddress, pGlowAddress);
 
 	WritePatch(hProcess, pIconsAddress, ICONS_ORIGINAL_BYTES, ICONS_PATCHED_BYTES, g_pPatch, sizeof(g_pPatch));
 	WritePatch(hProcess, pColorsAddress, COLORS_ORIGINAL_BYTES, COLORS_PATCHED_BYTES, g_pPatch, sizeof(g_pPatch));
+	WritePatch(hProcess, pGlowAddress, GLOW_ORIGINAL_BYTES, GLOW_PATCHED_BYTES, g_pPatch, sizeof(g_pPatch));
 
-	printf
-	(
-		"\n[*] Y to enable glow\n"
-		"[*] N to disable glow\n"
-		"[*] \"Enter\" or any other key to leave glow unchanged\n"
-		"[>] Enable glow? "
-	);
-	Input = (CHAR)getchar();
-	switch (Input)
-	{
-	case 'Y':
-	case 'y':
-	{
-		WriteGlowPatch(hProcess, hModule, 1);
-		getchar(); // You may wonder why I need 2 calls to getchar, that's because there is the character the user presses, and then a new line that the next getchar will take. Fantastic.
-		break;
-	}
-	case 'N':
-	case 'n':
-	{
-		WriteGlowPatch(hProcess, hModule, 0);
-		getchar(); // You may wonder why I need 2 calls to getchar, that's because there is the character the user presses, and then a new line that the next getchar will take. Fantastic.
-		break;
-	}
-	}
-
-	printf("\n[+] Done! You may now close this window.");
+	printf("[+] Done! You may now close this window.");
 	getchar();
 	return 0;
 }
